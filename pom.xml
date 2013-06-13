@@ -27,6 +27,10 @@
 
     </repositories>
 
+    <scm>
+        <connection>scm:git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</connection>
+        <url>git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</url>
+    </scm>
 
     <pluginRepositories>
 
@@ -38,6 +42,21 @@
     </pluginRepositories>
 
 
+    <distributionManagement>
+        <!-- Publish versioned releases here -->
+        <repository>
+            <id>esco</id>
+            <name>releases</name>
+            <url>http://www.esco-portail.org/nexus/content/repositories/releases/</url>
+        </repository>
+
+        <!-- Publish snapshots here -->
+        <snapshotRepository>
+            <id>esco</id>
+            <name>snapshots</name>
+            <url>http://www.esco-portail.org/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
 
@@ -332,6 +351,11 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.2</version>
+            </plugin>
+            <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
                 <version>1.9.0</version>
@@ -366,12 +390,8 @@
                     </cssUrls>
 
                     <!-- To use custom Javascript in the portal -->
-                    <!--
-                    <jsUrls>
-                        <url>http://my.server/custom.js</url>
-                        <url>http://my.server/another.js</url>
-                    </jsUrls>
-                    -->
+                    <!-- <jsUrls> <url>http://my.server/custom.js</url> <url>http://my.server/another.js</url>
+                        </jsUrls> -->
 
                 </configuration>
 
@@ -394,6 +414,7 @@
                     <classpathScope>test</classpathScope>
                 </configuration>
             </plugin>
+
 
         </plugins>
     </build>
