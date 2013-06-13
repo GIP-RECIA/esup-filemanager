@@ -26,6 +26,10 @@
  
   </repositories>
   
+<scm>
+		<connection>scm:git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</connection>
+		<url>git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</url>
+	</scm>
 
   <pluginRepositories>
 
@@ -37,6 +41,21 @@
   </pluginRepositories>
 
 
+         <distributionManagement>
+                <!-- Publish versioned releases here -->
+                <repository>
+                        <id>esco</id>
+                        <name>releases</name>
+                        <url>http://www.esco-portail.org/nexus/content/repositories/releases/</url>
+                </repository>
+
+                <!-- Publish snapshots here -->
+                <snapshotRepository>
+                        <id>esco</id>
+                        <name>snapshots</name>
+                        <url>http://www.esco-portail.org/nexus/content/repositories/snapshots/</url>
+                </snapshotRepository>
+        </distributionManagement>
 
   <dependencies>
 
@@ -305,14 +324,29 @@
 	  <source>1.5</source>
 	  <target>1.5</target>
 	</configuration>
-      </plugin>
-      <plugin>
+	  </plugin>
+	  <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-war-plugin</artifactId>
-	<configuration>
-		<warName>esup-filemanager</warName>
-	</configuration>
-	<version>2.0.2</version>
+		<artifactId>maven-war-plugin</artifactId>
+		<configuration>
+			<attachClasses>true</attachClasses>
+			<warName>esup-filemanager</warName>
+			<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+		</configuration>
+		<version>2.4</version>
+	</plugin>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-source-plugin</artifactId>
+		<version>2.2.1</version>
+		<executions>
+			<execution>
+				<id>attach-sources</id>
+				<goals>
+					<goal>jar</goal>
+				</goals>
+			</execution>
+		</executions>
       </plugin>
       <plugin>
 	<groupId>com.mycila.maven-license-plugin</groupId>
@@ -358,8 +392,7 @@
 
             </configuration>
 	      
-	 </plugin>
-
+	</plugin>
          <plugin>
              <groupId>org.codehaus.mojo</groupId>
              <artifactId>exec-maven-plugin</artifactId>
@@ -376,9 +409,8 @@
                  <mainClass>org.esupportail.portlet.filemanager.jcifs.SmbDfsThreadTest</mainClass>
                  <classpathScope>test</classpathScope>
              </configuration>
-         </plugin>
+	 </plugin>
 
-         
     </plugins>
   </build>
 
