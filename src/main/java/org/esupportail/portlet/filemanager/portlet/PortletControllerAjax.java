@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +39,7 @@ import org.esupportail.portlet.filemanager.beans.DownloadFile;
 import org.esupportail.portlet.filemanager.beans.FileUpload;
 import org.esupportail.portlet.filemanager.beans.FormCommand;
 import org.esupportail.portlet.filemanager.beans.JsTreeFile;
+import org.esupportail.portlet.filemanager.beans.Quota;
 import org.esupportail.portlet.filemanager.beans.SharedUserPortletParameters;
 import org.esupportail.portlet.filemanager.exceptions.EsupStockException;
 import org.esupportail.portlet.filemanager.services.IServersAccessService;
@@ -126,7 +128,7 @@ public class PortletControllerAjax {
 	 * @return
 	 */
 	@ResourceMapping("htmlFileTree")
-	public ModelAndView fileTree(@RequestParam String dir, ResourceRequest request, ResourceResponse response) {
+	public ModelAndView fileTree(@RequestParam String dir, @RequestParam(required=false) String sortField, ResourceRequest request, ResourceResponse response) {
 		dir = pathEncodingUtils.decodeDir(dir);
 		ModelMap model = new ModelMap();
 		if(this.serverAccess.formAuthenticationRequired(dir, userParameters)) {
@@ -140,7 +142,14 @@ public class PortletControllerAjax {
 		pathEncodingUtils.encodeDir(resource);
 		model.put("resource", resource);
 		List<JsTreeFile> files = this.serverAccess.getChildren(dir, userParameters);
-		Collections.sort(files);
+		
+		Comparator<JsTreeFile> comparator = JsTreeFile.comparators.get(sortField);
+		if(comparator != null) {
+			Collections.sort(files, comparator);
+		} else {
+			Collections.sort(files);	
+		}
+		
 		pathEncodingUtils.encodeDir(files);
 		model.put("files", files); 
 		ListOrderedMap parentsEncPathes = pathEncodingUtils.getParentsEncPathes(resource);
@@ -215,7 +224,7 @@ public class PortletControllerAjax {
 		String parentDirDecoded = pathEncodingUtils.decodeDir(parentDir);
 		String fileDir = this.serverAccess.createFile(parentDirDecoded, title, type, userParameters);
 		if(fileDir != null) {
-			return this.fileTree(parentDir, request, response);
+			return this.fileTree(parentDir, null, request, response);
 		} 
 		 
 		//Added for GIP Recia : Error handling 
@@ -232,7 +241,7 @@ public class PortletControllerAjax {
 		parentDir = pathEncodingUtils.decodeDir(parentDir);
 		dir = pathEncodingUtils.decodeDir(dir);
 		if(this.serverAccess.renameFile(dir, title, userParameters)) {
-			return this.fileTree(pathEncodingUtils.encodeDir(parentDir), request, response);	
+			return this.fileTree(pathEncodingUtils.encodeDir(parentDir), null, request, response);	
 		}
 		
 		//Usually means file does not exist
@@ -443,7 +452,10 @@ public class PortletControllerAjax {
 			pathEncodingUtils.encodeDir(resource);
 			
 			// Based on the resource type, direct to appropriate details view
-			if ("folder".equals(resource.getType()) || "drive".equals(resource.getType())) {
+			if ("folder".equals(resource.getType()) || "drive".equals(resource.getType())) {		
+				Quota quota = this.serverAccess.getQuota(path, userParameters);
+				if(quota != null)
+					model.put("quota", quota);
 				model.put("file", resource);
 				return new ModelAndView("details_folder", model);
 			} else if ("file".equals(resource.getType())) {

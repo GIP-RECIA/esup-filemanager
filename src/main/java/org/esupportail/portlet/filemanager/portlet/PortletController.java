@@ -48,7 +48,6 @@ public class PortletController {
 
 	protected Logger log = Logger.getLogger(PortletController.class);
 	
-	public static final String PREF_ESUPSTOCK_CONTEXTTOKEN = "contextToken";
 	public static final String PREF_PORTLET_VIEW = "defaultPortletView";
 	public static final String PREF_DEFAULT_PATH = "defaultPath";
 	public static final String PREF_SHOW_HIDDEN_FILES = "showHiddenFiles";
@@ -77,13 +76,10 @@ public class PortletController {
 			String clientIpAdress = request.getProperty("REMOTE_ADDR");
 	    	userParameters.init(clientIpAdress);			
 	        
-	    	final PortletPreferences prefs = request.getPreferences();
-	    	String contextToken = prefs.getValue(PREF_ESUPSTOCK_CONTEXTTOKEN, null);
-	    	
 			Map userInfos = (Map) request.getAttribute(PortletRequest.USER_INFO);	
 			userParameters.setUserInfos(userInfos);
 			
-			List<String> driveNames = serverAccess.getRestrictedDrivesGroupsContext(request, contextToken, userInfos);
+			List<String> driveNames = serverAccess.getRestrictedDrivesGroupsContext(request);
 			userParameters.setDriveNames(driveNames);
 						
 	   		log.info("set SharedUserPortletParameters in application session");   		

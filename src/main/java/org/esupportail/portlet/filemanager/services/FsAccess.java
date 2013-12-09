@@ -26,10 +26,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.esupportail.portlet.filemanager.beans.DownloadFile;
 import org.esupportail.portlet.filemanager.beans.JsTreeFile;
+import org.esupportail.portlet.filemanager.beans.Quota;
 import org.esupportail.portlet.filemanager.beans.SharedUserPortletParameters;
 import org.esupportail.portlet.filemanager.beans.UserPassword;
 import org.esupportail.portlet.filemanager.services.auth.FormUserPasswordAuthenticatorService;
 import org.esupportail.portlet.filemanager.services.auth.UserAuthenticatorService;
+import org.esupportail.portlet.filemanager.services.evaluators.IDriveAccessEvaluator;
+import org.esupportail.portlet.filemanager.services.quota.IQuotaService;
 import org.esupportail.portlet.filemanager.services.uri.UriManipulateService;
 
 public abstract class FsAccess {
@@ -42,11 +45,7 @@ public abstract class FsAccess {
 
     protected String datePattern = "dd/MM/yyyy HH:mm";
 
-	private List<String> memberOfAny;
-
-	private Map<String, String> hasAttributs;
-
-	private String contextToken;
+	private IDriveAccessEvaluator evaluator;
 
 	protected String driveName;
 
@@ -59,33 +58,19 @@ public abstract class FsAccess {
 	protected UriManipulateService uriManipulateService;
 
 	private boolean uriManipulateDone = false;
+	
+	protected IQuotaService quotaService = null;
 
 	public void setDatePattern(String datePattern) {
 		this.datePattern = datePattern;
 	}
 
-	public List<String> getMemberOfAny() {
-		return memberOfAny;
+	public IDriveAccessEvaluator getEvaluator() {
+		return evaluator;
 	}
 
-	public void setMemberOfAny(List<String> memberOfAny) {
-		this.memberOfAny = memberOfAny;
-	}
-
-	public Map<String, String> getHasAttributs() {
-		return hasAttributs;
-	}
-
-	public void setHasAttributs(Map<String, String> hasAttributs) {
-		this.hasAttributs = hasAttributs;
-	}
-
-	public String getContextToken() {
-		return contextToken;
-	}
-
-	public void setContextToken(String contextToken) {
-		this.contextToken = contextToken;
+	public void setEvaluator(final IDriveAccessEvaluator evaluator) {
+		this.evaluator = evaluator;
 	}
 
 	public String getDriveName() {
@@ -120,6 +105,10 @@ public abstract class FsAccess {
 	public void setUriManipulateService(
 			UriManipulateService uriManipulateService) {
 		this.uriManipulateService = uriManipulateService;
+	}
+	
+	public void setQuotaService(IQuotaService quotaService) {
+		this.quotaService = quotaService;
 	}
 
 	protected void manipulateUri(Map userInfos, String formUsername) {
@@ -216,5 +205,18 @@ public abstract class FsAccess {
 	@Deprecated
 	public void setShowHiddenFiles(boolean showHiddenFiles) {
 		log.warn("showHiddenFiles in FsAccess is now deprecated (it will not be used here), configure showHiddenFiles now in portlet.xml or when publishing your portlet");
+	}
+	
+	public Quota getQuota(String path, 
+			SharedUserPortletParameters userParameters) {
+		if(quotaService != null)
+			return quotaService.getQuota(path, userParameters);
+		return null;
+	}
+	public boolean isSupportQuota(String path, 
+			SharedUserPortletParameters userParameters) {
+		if(quotaService != null)
+			return quotaService.isSupportQuota(path, userParameters);
+		return false;
 	}
 }
