@@ -25,6 +25,11 @@
 	text-align: left;
 }
 
+.esupstock  #browserArea {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
 .esupstock td,
 .esupstock th {
 	border: 0;
@@ -604,4 +609,15 @@ http://code.google.com/p/jstree/issues/detail?id=922&q=IE%20expand&colspec=ID%20
 }
 .esupstock .container {
     width: auto;
+}
+
+/* RWD */
+@media screen {
+	@media (max-width: 768px) {
+		.toolbar-item > a {
+			background-size: 16px !important;
+			font-size: 12px;
+			padding-top: 16px !important;
+		}
+	}
 }
