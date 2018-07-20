@@ -20,11 +20,14 @@ package org.esupportail.portlet.filemanager.services.vfs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Properties;
 
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,16 +59,18 @@ import org.esupportail.portlet.filemanager.services.ResourceUtils;
 import org.esupportail.portlet.filemanager.services.auth.cas.UserCasAuthenticatorService;
 import org.esupportail.portlet.filemanager.services.vfs.auth.DynamicUserAuthenticator;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;
-
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 
 public class VfsAccessImpl extends FsAccess implements DisposableBean {
 
 	protected static final Log log = LogFactory.getLog(VfsAccessImpl.class);
+	
+	public static String COMMON_VFS_TIMEOUT = "org.esupportail.portlet.filemanager.VSF.TIMEOUT";
+	public static String COMMON_VFS_SO_TIMEOUT = "org.esupportail.portlet.filemanager.VSF.SO_TIMEOUT";
+	public static String COMMON_VFS_DATA_TIMEOUT = "org.esupportail.portlet.filemanager.VSF.DATA_TIMEOUT";
 	
 	protected FileSystemManager fsManager;
 
@@ -81,6 +86,14 @@ public class VfsAccessImpl extends FsAccess implements DisposableBean {
     
     // we setup ftpPassiveMode to true by default ...
     protected boolean ftpPassiveMode = true;
+
+	@Autowired
+	@Qualifier("vfsProperties")
+	private Properties vfsConfigProperties;
+
+	public void setVfsConfigProperties(Properties vfsConfigProperties) {
+		this.vfsConfigProperties = vfsConfigProperties;
+	}
 
 	public void setResourceUtils(ResourceUtils resourceUtils) {
 		this.resourceUtils = resourceUtils;
@@ -104,6 +117,26 @@ public class VfsAccessImpl extends FsAccess implements DisposableBean {
 		try {
 			if(!isOpened()) {
 				FileSystemOptions fsOptions = new FileSystemOptions();
+
+				if (vfsConfigProperties != null && !vfsConfigProperties.isEmpty()) {
+					if (vfsConfigProperties.containsKey(COMMON_VFS_TIMEOUT)) {
+						SftpFileSystemConfigBuilder.getInstance().setTimeout(fsOptions,
+								Integer.parseInt(vfsConfigProperties.getProperty(COMMON_VFS_TIMEOUT)));
+						FtpFileSystemConfigBuilder.getInstance().setConnectTimeout(fsOptions,
+								Integer.parseInt(vfsConfigProperties.getProperty(COMMON_VFS_TIMEOUT)));
+					}
+					if (vfsConfigProperties.containsKey(COMMON_VFS_DATA_TIMEOUT)) {
+						FtpFileSystemConfigBuilder.getInstance().setDataTimeout(fsOptions,
+								Integer.parseInt(vfsConfigProperties.getProperty(COMMON_VFS_DATA_TIMEOUT)));
+					}
+					if (vfsConfigProperties.containsKey(COMMON_VFS_SO_TIMEOUT)) {
+						FtpFileSystemConfigBuilder.getInstance().setSoTimeout(fsOptions,
+								Integer.parseInt(vfsConfigProperties.getProperty(COMMON_VFS_SO_TIMEOUT)));
+					}
+				}
+				log.debug("Timeout defined : timeout " + FtpFileSystemConfigBuilder.getInstance().getConnectTimeout(fsOptions)
+								+ ", data_timeout " + FtpFileSystemConfigBuilder.getInstance().getDataTimeout(fsOptions)
+								+ ", so_timeout " +	FtpFileSystemConfigBuilder.getInstance().getSoTimeout(fsOptions));
 				
 				if ( ftpControlEncoding != null )
 					FtpFileSystemConfigBuilder.getInstance().setControlEncoding(fsOptions, ftpControlEncoding);
