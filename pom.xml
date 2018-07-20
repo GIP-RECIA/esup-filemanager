@@ -6,7 +6,7 @@
   <artifactId>esup-filemanager</artifactId>
   <packaging>war</packaging>
   <name>esup-filemanager</name>
-  <version>3.2.1-esco-patch1-SNAPSHOT</version>
+  <version>3.2.1-SNAPSHOT</version>
 
 
   <description>ESUP File Manager is a JSR286 Portlet. Esup File Manager allows users to perform file management on their HomeDirs.</description>
@@ -91,14 +91,11 @@
   <!-- Dependency Version Properties -->
   <properties>
     <uportal-libs.version>5.1.0</uportal-libs.version>
-
-    <maven.javadoc.skip>true</maven.javadoc.skip>
   </properties>
 
   <scm>
     <connection>scm:git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</connection>
     <url>git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</url>
-    <tag>HEAD</tag>
   </scm>
 
   <repositories>
@@ -543,17 +540,17 @@
         </configuration>
       </plugin>
 
-      <!--<plugin>-->
-        <!--<groupId>org.sonatype.plugins</groupId>-->
-        <!--<artifactId>nexus-staging-maven-plugin</artifactId>-->
-        <!--<version>1.6.7</version>-->
-        <!--<extensions>true</extensions>-->
-        <!--<configuration>-->
-          <!--<serverId>ossrh</serverId>-->
-          <!--<nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
-          <!--<autoReleaseAfterClose>false</autoReleaseAfterClose>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.7</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>false</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
