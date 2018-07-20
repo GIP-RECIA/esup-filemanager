@@ -94,7 +94,8 @@
   </properties>
 
   <scm>
-    <url>https://github.com/EsupPortail/esup-filemanager</url>
+    <connection>scm:git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</connection>
+    <url>git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</url>
   </scm>
 
   <repositories>
@@ -126,14 +127,19 @@
   </pluginRepositories>
 
   <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
+    <!-- Publish versioned releases here -->
     <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>esco</id>
+      <name>releases</name>
+      <url>https://nexus.recia.fr/content/repositories/releases/</url>
     </repository>
+
+    <!-- Publish snapshots here -->
+    <snapshotRepository>
+      <id>esco</id>
+      <name>snapshots</name>
+      <url>https://nexus.recia.fr/nexus/content/repositories/snapshots/</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <dependencyManagement>
