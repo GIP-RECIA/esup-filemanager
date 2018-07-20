@@ -6,7 +6,7 @@
   <artifactId>esup-filemanager</artifactId>
   <packaging>war</packaging>
   <name>esup-filemanager</name>
-  <version>3.2.0-esco-patch1</version>
+  <version>3.2.1-esco-patch1-SNAPSHOT</version>
 
 
   <description>ESUP File Manager is a JSR286 Portlet. Esup File Manager allows users to perform file management on their HomeDirs.</description>
@@ -96,7 +96,7 @@
   <scm>
     <connection>scm:git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</connection>
     <url>git:ssh://git@github.com/GIP-RECIA/esup-filemanager.git</url>
-    <tag>3.2.0-esco-patch1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
