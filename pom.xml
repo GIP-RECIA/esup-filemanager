@@ -139,7 +139,7 @@
     <snapshotRepository>
       <id>esco</id>
       <name>snapshots</name>
-      <url>https://nexus.recia.fr/nexus/content/repositories/snapshots/</url>
+      <url>https://nexus.recia.fr/content/repositories/snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
 
