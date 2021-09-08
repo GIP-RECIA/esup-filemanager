@@ -29,6 +29,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import jcifs.ACE;
+import jcifs.CIFSContext;
+import jcifs.CIFSException;
+import jcifs.SmbConstants;
+import jcifs.config.PropertyConfiguration;
+import jcifs.context.BaseContext;
+import jcifs.smb.NtStatus;
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbAuthException;
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.esupportail.portlet.filemanager.beans.DownloadFile;
@@ -44,17 +55,6 @@ import org.esupportail.portlet.filemanager.services.ResourceUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.util.FileCopyUtils;
 
-import jcifs.ACE;
-import jcifs.CIFSContext;
-import jcifs.CIFSException;
-import jcifs.config.PropertyConfiguration;
-import jcifs.context.BaseContext;
-import jcifs.smb.NtStatus;
-import jcifs.smb.NtlmPasswordAuthentication;
-import jcifs.smb.SmbAuthException;
-import jcifs.smb.SmbException;
-import jcifs.smb.SmbFile;
-
 public class CifsAccessImpl extends FsAccess implements DisposableBean {
 
 	protected static final Log log = LogFactory.getLog(CifsAccessImpl.class);
@@ -64,12 +64,12 @@ public class CifsAccessImpl extends FsAccess implements DisposableBean {
 	private NtlmPasswordAuthentication userAuthenticator;
 
 	protected SmbFile root;
-	
+
 	protected boolean jcifsSynchronizeRootListing = false;
 
 	/** CIFS properties */
 	protected Properties jcifsConfigProperties;
-	
+
 	protected CIFSContext cifsContext;
 
 	public void setJcifsConfigProperties(Properties jcifsConfigProperties) {
@@ -265,7 +265,9 @@ public class CifsAccessImpl extends FsAccess implements DisposableBean {
 			try {
 				ACE[] ACEs = resource.getSecurity();
 				for(ACE ace: ACEs) {
-					if (this.userAuthenticator.getUsername().equals(ace.getSID().getAccountName())) {
+					log.trace("check ACE on type " +  resource.getType() + " for SID name " + ace.getSID().getAccountName() + " is writable " + ((ace.getAccessMask() & ACE.FILE_WRITE_DATA)!=0) );
+					if ((resource.getType() == SmbConstants.TYPE_SHARE && ace.getSID().getAccountName().contains("domain users")) ||
+						(this.userAuthenticator.getUsername().equals(ace.getSID().getAccountName()))) {
 						if ((ace.getAccessMask() & ACE.FILE_WRITE_DATA)!=0) {
 							resourceWritable = true;
 							break;
@@ -398,7 +400,7 @@ public class CifsAccessImpl extends FsAccess implements DisposableBean {
 
 		boolean success = false;
 		SmbFile newFile = null;
-		
+
 		try {
 			SmbFile folder = cd(dir, userParameters);
 			newFile = new SmbFile(folder.getCanonicalPath() + filename, this.cifsContext);
@@ -430,7 +432,7 @@ public class CifsAccessImpl extends FsAccess implements DisposableBean {
 		} catch (IOException e) {
 			log.warn("can't upload file : " + e.getMessage(), e);
 		}
-		
+
 		if(!success && newFile != null) {
 			// problem when uploading the file -> the file uploaded is corrupted
 			// best is to delete it
@@ -441,10 +443,10 @@ public class CifsAccessImpl extends FsAccess implements DisposableBean {
 				log.debug("can't delete corrupted file after bad upload " + e.getMessage());
 			}
 		}
-		
+
 		return success;
 	}
-	
+
 
 	private SmbFile[] listFiles(SmbFile resource) throws SmbException {
 		if(jcifsSynchronizeRootListing && this.root.equals(resource)) {
@@ -479,5 +481,5 @@ public class CifsAccessImpl extends FsAccess implements DisposableBean {
 	public void setJcifsSynchronizeRootListing(boolean jcifsSynchronizeRootListing) {
 		this.jcifsSynchronizeRootListing = jcifsSynchronizeRootListing;
 	}
-	
+
 }
