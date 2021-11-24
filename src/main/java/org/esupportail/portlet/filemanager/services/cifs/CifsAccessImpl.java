@@ -32,6 +32,7 @@ import java.util.Properties;
 import jcifs.ACE;
 import jcifs.CIFSContext;
 import jcifs.CIFSException;
+import jcifs.SID;
 import jcifs.SmbConstants;
 import jcifs.config.PropertyConfiguration;
 import jcifs.context.BaseContext;
@@ -209,6 +210,11 @@ public class CifsAccessImpl extends FsAccess implements DisposableBean {
 		}
 	}
 
+	static final List<String> EveryUsers = new ArrayList<String>() {{
+    add("domain users");
+    add("everyone");
+    add("authenticated users");
+}};
 	private JsTreeFile resourceAsJsTreeFile(SmbFile resource, SharedUserPortletParameters userParameters, boolean folderDetails, boolean fileDetails) throws SmbException {
 		String lid = resource.getCanonicalPath();
 		String rootPath = root.getCanonicalPath();
@@ -265,9 +271,17 @@ public class CifsAccessImpl extends FsAccess implements DisposableBean {
 			try {
 				ACE[] ACEs = resource.getSecurity();
 				for(ACE ace: ACEs) {
-					log.trace("check ACE on type " +  resource.getType() + " for SID name " + ace.getSID().getAccountName() + " is writable " + ((ace.getAccessMask() & ACE.FILE_WRITE_DATA)!=0) );
-					if ((resource.getType() == SmbConstants.TYPE_SHARE && ace.getSID().getAccountName().contains("domain users")) ||
-						(this.userAuthenticator.getUsername().equals(ace.getSID().getAccountName()))) {
+					final jcifs.SID sid = ace.getSID();
+					if (log.isTraceEnabled() && ((ace.getAccessMask() & ACE.FILE_WRITE_DATA) != 0)) {
+						log.trace("Check writable ACE for user " + this.userAuthenticator.getUsername()
+								+ " on resource[path='" + resource.getPath() + "', type='" + resource.getType() + "']"
+								+ " SID[name='" + ace.getSID().getAccountName() + "'"
+								+ ", Type[id='" + sid.getType() + "', nom='" + sid.getTypeText() + "']"
+								+ ", domain='" + sid.getDomainName() + "', id='" + ace.getSID().toString() + "']");
+					}
+					if ((resource.getType() == SmbConstants.TYPE_SHARE && sid.getType() == SID.SID_TYPE_DOM_GRP
+							&& EveryUsers.contains(sid.getAccountName().toLowerCase())) ||
+						(sid.getType() == SID.SID_TYPE_USER && this.userAuthenticator.getUsername().equalsIgnoreCase(sid.getAccountName()))) {
 						if ((ace.getAccessMask() & ACE.FILE_WRITE_DATA)!=0) {
 							resourceWritable = true;
 							break;
